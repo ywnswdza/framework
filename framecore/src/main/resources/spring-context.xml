@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--suppress ALL -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       ">
+
+       <!-- 扫描下面的包 注解 -->
+       <context:component-scan base-package="org.losy" use-default-filters="false">
+              <context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+              <context:include-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+       </context:component-scan>
+
+       <!-- 读取配置文件  ignore-unresolvable 为true时可以配置多个context:property-placeholder加载多个properties配置文件  -->
+	   <context:property-placeholder location="classpath*:db.properties" ignore-unresolvable="true"/>
+
+       <!-- 数据源配置, 使用 BoneCP 数据库连接池 -->
+       <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+              <!-- 数据源驱动类可不写，Druid默认会自动根据URL识别DriverClass -->
+              <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+              <!-- 基本属性 url、user、password -->
+              <property name="url" value="jdbc:mysql://localhost:3306/losy?useUnicode=true&amp;characterEncoding=utf8"/>
+              <property name="username" value="root"/>
+              <property name="password" value="123456"/>
+              <!-- 配置初始化大小、最小、最大 -->
+              <property name="initialSize" value="3"/>
+              <property name="minIdle" value="3"/>
+              <property name="maxActive" value="20"/>
+              <!-- 配置获取连接等待超时的时间 -->
+              <property name="maxWait" value="60000"/>
+              <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+              <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+              <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+              <property name="minEvictableIdleTimeMillis" value="300000"/>
+              <property name="validationQuery" value="SELECT 1"/>
+              <property name="testWhileIdle" value="true"/>
+              <property name="testOnBorrow" value="false"/>
+              <property name="testOnReturn" value="false"/>
+              <!-- 打开PSCache，并且指定每个连接上PSCache的大小（Oracle使用）
+              <property name="poolPreparedStatements" value="true" />
+              <property name="maxPoolPreparedStatementPerConnectionSize" value="20" /> -->
+              <!-- 配置监控统计拦截的filters -->
+              <property name="filters" value="stat"/>
+       </bean>
+
+       <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+              <property name="dataSource" ref="dataSource"/>
+              <property name="configLocation" value="classpath:mybatis-config.xml"/>
+              <property name="mapperLocations" value="classpath*:mapper/*Mapper.xml"/>
+       </bean>
+
+       <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+              <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+              <property name="basePackage" value="org.losy"/>
+              <property name="annotationClass" value="org.springframework.stereotype.Repository"/>
+       </bean>
+
+       <!-- 配置事务管理器 -->
+       <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+              <property name="dataSource" ref="dataSource"/>
+       </bean>
+
+       <!-- 配置哪些类哪些方法使用事务,false，标准的jdk动态代理实现，必须实现了接口的service才能被代理 -->
+       <aop:config proxy-target-class="false">
+              <aop:advisor advice-ref="txadvice" pointcut="execution(* org.losy..*Service*.*(..))"/>
+              <aop:advisor advice-ref="txadvice" pointcut="within(org.losy..service..*)"/>
+       </aop:config>
+
+       <aop:aspectj-autoproxy/>
+
+       <!-- 事务的传播特性  -->
+       <tx:advice id="txadvice" transaction-manager="transactionManager">
+              <tx:attributes>
+                     <!--以add,del,modify开头的方法采用　required事务的传播特性  -->
+                     <tx:method name="add*" propagation="REQUIRED"/>
+                     <tx:method name="del*" propagation="REQUIRED"/>
+                     <tx:method name="modify*" propagation="REQUIRED"/>
+                     <tx:method name="update*" propagation="REQUIRED"/>
+                     <tx:method name="insert*" propagation="REQUIRED" rollback-for="java.sql.SQLException,java.lang.RuntimeException,java.lang.Exception"/>
+                     <tx:method name="remove*" propagation="REQUIRED"/>
+                     <tx:method name="delete*" propagation="REQUIRED"/>
+                     <tx:method name="execute*" propagation="REQUIRED"/>
+                     <tx:method name="save*" propagation="REQUIRED"/>
+                     <!-- 其它的方法  采用只读方式，hibernate在清理内存的时候不发sql语句   -->
+                     <tx:method name="*" propagation="SUPPORTS" read-only="true"/>
+              </tx:attributes>
+       </tx:advice>
+</beans>
