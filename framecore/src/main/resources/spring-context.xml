@@ -29,8 +29,8 @@
               <!-- 数据源驱动类可不写，Druid默认会自动根据URL识别DriverClass -->
               <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
               <!-- 基本属性 url、user、password -->
-              <property name="url" value="jdbc:mysql://localhost:3306/losy?useUnicode=true&amp;characterEncoding=utf8"/>
-              <property name="username" value="root"/>
+              <property name="url" value="jdbc:mysql://192.168.1.133:3306/framework?useUnicode=true&amp;characterEncoding=utf8"/>
+              <property name="username" value="losy"/>
               <property name="password" value="123456"/>
               <!-- 配置初始化大小、最小、最大 -->
               <property name="initialSize" value="3"/>
