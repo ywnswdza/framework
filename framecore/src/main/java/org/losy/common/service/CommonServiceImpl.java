@@ -60,7 +60,7 @@ public abstract class CommonServiceImpl<Mapper extends ICommonMapper<T>,T> imple
         RowBounds rb = new RowBounds(offset,limit);
         List<T> list = mapper.findEntityListLimit(entity,rb);
         Long allRow = mapper.findEntityListLimitAutoCount(entity);
-        return new Pager<>(list,allRow.intValue(),offset / limit + 1,limit);
+        return new Pager<T>(list,allRow.intValue(),offset / limit + 1,limit);
     }
 
     @Override
