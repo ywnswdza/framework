@@ -16,13 +16,9 @@
        </context:component-scan>
 
        <mvc:default-servlet-handler/>
-       <mvc:annotation-driven>
-              <mvc:argument-resolvers>
-                     <bean id="dateConverter" class="org.losy.mvc.DateConverter"/>
-              </mvc:argument-resolvers>
-       </mvc:annotation-driven>
+       <mvc:annotation-driven/>
 
-       <mvc:resources mapping="/resources/**" location=""/>
+       <mvc:resources mapping="/resources/**" location="/resources/**"/>
 
        <!-- jsp视图解析器 -->
        <bean id="jspView" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
