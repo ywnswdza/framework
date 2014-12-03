@@ -22,16 +22,16 @@
        </context:component-scan>
 
        <!-- 读取配置文件  ignore-unresolvable 为true时可以配置多个context:property-placeholder加载多个properties配置文件  -->
-	   <context:property-placeholder location="classpath*:db.properties" ignore-unresolvable="true"/>
+	   <context:property-placeholder location="classpath*:config/*.properties"/>
 
        <!-- 数据源配置, 使用 BoneCP 数据库连接池 -->
        <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
               <!-- 数据源驱动类可不写，Druid默认会自动根据URL识别DriverClass -->
-              <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+              <property name="driverClassName" value="${db.driver}"/>
               <!-- 基本属性 url、user、password -->
-              <property name="url" value="jdbc:mysql://192.168.1.133:3306/framework?useUnicode=true&amp;characterEncoding=utf8"/>
-              <property name="username" value="losy"/>
-              <property name="password" value="123456"/>
+              <property name="url" value="${db.url}"/>
+              <property name="username" value="${db.username}"/>
+              <property name="password" value="${db.password}"/>
               <!-- 配置初始化大小、最小、最大 -->
               <property name="initialSize" value="3"/>
               <property name="minIdle" value="3"/>
